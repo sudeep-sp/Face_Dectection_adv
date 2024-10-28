@@ -2,20 +2,23 @@ import cv2 as cv
 import os
 import uuid
 import mediapipe as mp
+import random
 
 # Ask for the name to create the folder
 name = input("Enter the name for the folder: ")
 
 # Define the output directory
-output_dir = f"data/faces/train/{name}"
+training_output_dir = f"data/faces/train/{name}"
+testing_output_dir = f'data/faces/test/{name}'
 
 # Check if the directory already exists
-if os.path.exists(output_dir):
-    print(f"Folder '{
-          output_dir}' already exists. Images will be saved in the existing folder.")
+if os.path.exists(training_output_dir):
+    print(
+        f"name '{name}' already exists. Images will be saved in the existing folder.")
 else:
-    os.makedirs(output_dir)
-    print(f"Folder '{output_dir}' created.")
+    os.makedirs(training_output_dir)
+    os.makedirs(testing_output_dir)
+    print(f"name '{name}' is added to database")
 
 cap = cv.VideoCapture(0)
 
@@ -39,7 +42,8 @@ while True:
 
     # If faces are detected, save the image
     if results.detections:
-        img_name = os.path.join(output_dir, f"{name}_{str(uuid.uuid4())}.jpg")
+        img_name = os.path.join(training_output_dir, f"{
+                                name}_{str(uuid.uuid4())}.jpg")
         cv.imwrite(img_name, img)
         count += 1
 
@@ -53,3 +57,13 @@ while True:
 
 cap.release()
 cv.destroyAllWindows()
+
+
+training_images = os.listdir(training_output_dir)
+
+test_images = random.sample(training_images, 20)
+
+for img_name in test_images:
+    src_path = os.path.join(training_output_dir, img_name)
+    dst_path = os.path.join(testing_output_dir, img_name)
+    os.rename(src_path, dst_path)
